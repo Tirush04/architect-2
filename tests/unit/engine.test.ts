@@ -74,6 +74,33 @@ describe("runPlan", () => {
   });
 });
 
+describe("runPlan revisions", () => {
+  it("demo: applies the revision to the current blueprint", async () => {
+    const current = pickScenario("dispute");
+    const { events, result } = await collect(runPlan("ignored", demo, undefined, { current, revision: "add a page called Chargebacks" }));
+    expect(result.pages.map((p) => p.name)).toContain("Chargebacks");
+    expect(result.appName).toBe("DisputeDesk");
+    expect(events.find((e) => e.type === "status")).toMatchObject({ text: expect.stringContaining("Chargebacks") });
+  });
+
+  it("demo: unknown revision keeps the blueprint and explains", async () => {
+    const current = pickScenario("dispute");
+    const { events, result } = await collect(runPlan("x", demo, undefined, { current, revision: "make it more enterprise" }));
+    expect(result).toEqual(current);
+    expect(events.find((e) => e.type === "status")).toMatchObject({ text: expect.stringMatching(/kept the Blueprint/) });
+  });
+
+  it("claude: sends the current blueprint with the revision", async () => {
+    const current = pickScenario("support");
+    vi.mocked(claude.planWithClaude).mockResolvedValue({ ...current, appName: "Helpline Pro" });
+    const { result } = await collect(runPlan("x", live, undefined, { current, revision: "rename to Helpline Pro" }));
+    expect(result.appName).toBe("Helpline Pro");
+    const sent = vi.mocked(claude.planWithClaude).mock.calls[0][0];
+    expect(sent).toContain('"appName": "Helpline"');
+    expect(sent).toContain("rename to Helpline Pro");
+  });
+});
+
 describe("runBuild", () => {
   it("demo: produces index.html, agent files, manifest and README", async () => {
     const bp = pickScenario("recruiting pipeline");

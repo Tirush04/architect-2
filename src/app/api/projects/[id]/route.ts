@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LIMITS, readJson } from "@/lib/body";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
@@ -17,10 +18,12 @@ const PatchSchema = z.object({
 });
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const raw = await readJson(req, LIMITS.medium);
+  if (!raw.ok) return raw.response;
   const { id } = await params;
   const r = await projectForRequest(id);
   if ("error" in r) return r.error;
-  const parsed = PatchSchema.safeParse(await req.json().catch(() => null));
+  const parsed = PatchSchema.safeParse(raw.data);
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid request");
   const { name, lens, framework, blueprint } = parsed.data;
   const project = r.project;

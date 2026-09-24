@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, build]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: architect
+          POSTGRES_PASSWORD: architect
+          POSTGRES_DB: architect
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U architect" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://architect:architect@localhost:5432/architect
+      AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
+      AUTH_TRUST_HOST: "true"
+      ARCHITECT_FAKE_LLM: "1"
+      ARCHITECT_DEMO_SPEED: "0.05"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prisma db push --skip-generate
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:cov
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS, readJson } from "@/lib/body";
 import { db } from "@/lib/db";
 import { sseResponse } from "@/lib/sse";
 import { sleep } from "@/lib/engine";
@@ -9,11 +10,13 @@ import { badRequest, projectForRequest } from "@/lib/route-helpers";
 import type { Files } from "@/lib/schemas";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const raw = await readJson(req, LIMITS.small);
+  if (!raw.ok) return raw.response;
   const { id } = await params;
   const r = await projectForRequest(id);
   if ("error" in r) return r.error;
   const { project } = r;
-  const body = z.object({ version: z.number().int().positive().optional() }).safeParse(await req.json().catch(() => ({})));
+  const body = z.object({ version: z.number().int().positive().optional() }).safeParse((raw.data ?? {}));
   if (!body.success) return badRequest("Invalid version");
   const checkpoint = body.data.version
     ? await db.checkpoint.findUnique({ where: { projectId_version: { projectId: id, version: body.data.version } } })

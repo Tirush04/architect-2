@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, FileCode2, FilePlus2, Folder, GitCompare, Lock, Save, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button, Input, Spinner } from "@/components/ui";
@@ -70,7 +70,22 @@ export function CodePanel({ api }: { api: WorkspaceApi }) {
     if (active && files[active] === undefined) setActive(files["index.html"] !== undefined ? "index.html" : paths[0] ?? "");
   }, [files, active, paths]);
 
-  useEffect(() => setBuffers({}), [data.version]);
+  // On a new version, keep unsaved edits; drop buffers that now match disk, and warn on conflicts.
+  const prevFiles = useRef(files);
+  useEffect(() => {
+    const before = prevFiles.current;
+    prevFiles.current = files;
+    if (before === files) return;
+    setBuffers((b) => {
+      const next: Record<string, string> = {};
+      for (const [path, content] of Object.entries(b)) {
+        if (files[path] === undefined || files[path] === content) continue;
+        if (before[path] !== files[path]) toast.warning(`${path} changed in v${data.version}. Your unsaved edits are kept; saving will overwrite it.`);
+        next[path] = content;
+      }
+      return next;
+    });
+  }, [files, data.version]);
 
   useEffect(() => {
     if (diffAgainst == null) return setBaseFiles(null);

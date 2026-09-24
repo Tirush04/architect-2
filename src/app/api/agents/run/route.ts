@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LIMITS, readJson } from "@/lib/body";
 import { z } from "zod";
 import { runAgentWithClaude } from "@/lib/engine/claude";
 import { readBlueprint } from "@/lib/projects";
@@ -23,7 +24,9 @@ function scriptedAnswer(agent: { name: string; tools: string[] }, input: string)
 }
 
 export async function POST(req: Request) {
-  const parsed = RunSchema.safeParse(await req.json().catch(() => null));
+  const raw = await readJson(req, LIMITS.small);
+  if (!raw.ok) return raw.response;
+  const parsed = RunSchema.safeParse(raw.data);
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid request");
   const r = await projectForRequest(parsed.data.projectId);
   if ("error" in r) return r.error;

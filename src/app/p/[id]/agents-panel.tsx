@@ -207,7 +207,7 @@ export function AgentsPanel({ api }: { api: WorkspaceApi }) {
             edges={edges}
             nodeTypes={nodeTypes}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.15, maxZoom: 1.1 }}
             nodesConnectable={false}
             proOptions={{ hideAttribution: true }}
             colorMode={theme}

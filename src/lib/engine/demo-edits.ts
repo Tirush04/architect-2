@@ -64,7 +64,7 @@ export function applyDemoEdit(input: Blueprint, instruction: string): DemoEditRe
     const name = titleCase(clean(addPage[1]));
     if (name && !bp.pages.some((p) => p.name.toLowerCase() === name.toLowerCase())) {
       bp.pages.push({ name, purpose: `Everything about ${name.toLowerCase()}`, components: ["Table", "Filters"] });
-      changes.push(`Added a "${name}" page`);
+      changes.push(`Added a page called “${name}”`);
     }
   }
 
@@ -73,7 +73,7 @@ export function applyDemoEdit(input: Blueprint, instruction: string): DemoEditRe
     const target = clean(removePage[1]).toLowerCase();
     const before = bp.pages.length;
     bp.pages = bp.pages.filter((p) => p.name.toLowerCase() !== target);
-    if (bp.pages.length < before) changes.push(`Removed the "${titleCase(target)}" page`);
+    if (bp.pages.length < before) changes.push(`Removed the page “${titleCase(target)}”`);
   }
 
   const addAgent = instruction.match(/add (?:an? )?(?:new )?agent(?: that| to| which| for)?\s+(.+)$/i);

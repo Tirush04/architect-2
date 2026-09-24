@@ -114,6 +114,20 @@ test("prompt → Blueprint → build → iterate → code → agents → deploy 
   await expect(page.getByRole("link", { name: /Open DisputeDesk/ })).toBeVisible();
 });
 
+test("chat before the first build revises the Blueprint and is kept in history", async ({ page }) => {
+  test.setTimeout(150_000);
+  await signUpAndOnboard(page);
+  await createPlannedProject(page, "A customer support helpdesk with ticket triage");
+  await page.getByLabel("Message Architect").fill("Add a page called Escalations");
+  await page.getByRole("button", { name: "Send", exact: true }).click();
+  await expect(page.getByText(/Added a page called “Escalations”/)).toBeVisible();
+  await page.reload();
+  await expect(page.getByText("Add a page called Escalations")).toBeVisible();
+  await page.getByRole("tablist", { name: "Workspace" }).getByRole("tab", { name: /Blueprint/ }).click();
+  await expect(page.getByLabel(/Page \d name/).last()).toHaveValue("Escalations");
+  await expect(page.getByRole("button", { name: /v0/ })).toBeVisible();
+});
+
 test("click-to-edit selection is attached to the next message", async ({ page }) => {
   test.setTimeout(150_000);
   await signUpAndOnboard(page);

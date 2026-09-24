@@ -94,6 +94,16 @@ test.describe("security", () => {
     expect(JSON.stringify(body)).not.toContain("supersecretvalue");
   });
 
+  test("oversized request bodies are rejected before parsing", async ({ page }) => {
+    await signUpAndOnboard(page);
+    const huge = await page.request.post("/api/projects", { data: { prompt: "x".repeat(40_000) } });
+    expect(huge.status()).toBe(413);
+    const bigImport = await page.request.post("/api/import", {
+      data: { kind: "upload", name: "big", files: Object.fromEntries(Array.from({ length: 12 }, (_, i) => [`f${i}.ts`, "x".repeat(390_000)])) },
+    });
+    expect(bigImport.status()).toBe(413);
+  });
+
   test("unknown share links 404 safely", async ({ request }) => {
     const res = await request.get("/share/nope-nope-nope");
     expect(res.status()).toBe(404);

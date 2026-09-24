@@ -161,7 +161,7 @@ export function Workspace({ initial, autoStart }: { initial: WorkspaceData; auto
 
   const pid = data.project.id;
   const startPlan = useCallback(
-    (prompt?: string) => execute("plan", `/api/projects/${pid}/plan`, { prompt }, () => setTab("blueprint")),
+    (message?: string) => execute("plan", `/api/projects/${pid}/plan`, { message }, () => setTab("blueprint")),
     [execute, pid],
   );
   const startBuild = useCallback(() => {
@@ -175,11 +175,11 @@ export function Workspace({ initial, autoStart }: { initial: WorkspaceData; auto
         ...d,
         messages: [...d.messages, { id: `tmp-${Date.now()}`, role: "user", content: message, meta: sel ? { selection: sel } : null, createdAt: new Date().toISOString() }],
       }));
-      if (!data.blueprint) return startPlan(message);
-      if (data.version === 0) return startBuild();
+      // Before the first build, chat revises the plan; after it, chat edits the app.
+      if (data.version === 0) return startPlan(message);
       return execute("edit", `/api/projects/${pid}/chat`, { message, selection: sel });
     },
-    [data.blueprint, data.version, execute, pid, startBuild, startPlan],
+    [data.version, execute, pid, startPlan],
   );
   const startDeploy = useCallback(
     (version?: number) => {

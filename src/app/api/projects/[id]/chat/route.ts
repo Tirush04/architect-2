@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { LIMITS, readJson } from "@/lib/body";
 import { db } from "@/lib/db";
 import { runEdit } from "@/lib/engine";
 import { sseResponse } from "@/lib/sse";
@@ -10,11 +11,13 @@ import { ChatSchema, type Files } from "@/lib/schemas";
 export const maxDuration = 300;
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const raw = await readJson(req, LIMITS.small);
+  if (!raw.ok) return raw.response;
   const { id } = await params;
   const r = await projectForRequest(id);
   if ("error" in r) return r.error;
   const { project, userId } = r;
-  const parsed = ChatSchema.safeParse(await req.json().catch(() => null));
+  const parsed = ChatSchema.safeParse(raw.data);
   if (!parsed.success) return badRequest("Message is required");
   const blueprint = readBlueprint(project.blueprint);
   const latest = await latestCheckpoint(id);

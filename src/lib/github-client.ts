@@ -1,6 +1,7 @@
 import "server-only";
 import { Octokit } from "octokit";
 import { db } from "@/lib/db";
+import { decryptSecret } from "@/lib/crypto";
 import type { GitHubRest } from "@/lib/github";
 
 export async function githubAccount(userId: string) {
@@ -11,7 +12,14 @@ export async function githubAccount(userId: string) {
 export async function githubFor(userId: string): Promise<GitHubRest | null> {
   const acct = await githubAccount(userId);
   if (!acct?.access_token) return null;
-  const octokit = new Octokit({ auth: acct.access_token, userAgent: "architect-2" });
+  let token: string;
+  try {
+    token = decryptSecret(acct.access_token);
+  } catch {
+    // Unreadable (e.g. AUTH_SECRET rotated): treat as disconnected so the user reconnects.
+    return null;
+  }
+  const octokit = new Octokit({ auth: token, userAgent: "architect-2" });
   return octokit.rest as unknown as GitHubRest;
 }
 

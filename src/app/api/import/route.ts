@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LIMITS, readJson } from "@/lib/body";
 import { z } from "zod";
 import { sessionUserId } from "@/lib/session";
 import { githubFor, isAuthError } from "@/lib/github-client";
@@ -7,6 +8,8 @@ import { isSafePath } from "@/lib/engine/file-stream-parser";
 import { createImportedProject } from "@/lib/import-project";
 import { MAX_FILE_BYTES } from "@/lib/projects";
 import { badRequest, unauthorized } from "@/lib/route-helpers";
+import { usageStatus } from "@/lib/rate-limit";
+import { prismaUsageStore } from "@/lib/usage";
 import type { Files } from "@/lib/schemas";
 
 export const maxDuration = 120;
@@ -19,9 +22,14 @@ const UploadSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  const raw = await readJson(req, LIMITS.upload);
+  if (!raw.ok) return raw.response;
   const userId = await sessionUserId();
   if (!userId) return unauthorized();
-  const body = await req.json().catch(() => null);
+  const quota = await usageStatus(prismaUsageStore, userId, "import", new Date(), 30);
+  if (quota.overLimit) return NextResponse.json({ error: "Daily import limit reached. Try again tomorrow." }, { status: 429 });
+  await prismaUsageStore.record(userId, "import");
+  const body = raw.data;
 
   const repo = RepoSchema.safeParse(body);
   if (repo.success) {

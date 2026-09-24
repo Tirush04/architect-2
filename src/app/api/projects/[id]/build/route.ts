@@ -16,12 +16,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const blueprint = readBlueprint(project.blueprint);
   if (!blueprint) return badRequest("Draft and approve a Blueprint first");
   const mode = await engineFor(userId);
+  const settled = project.status === "DEPLOYED" ? "DEPLOYED" : "READY";
 
   return sseResponse(async (emit, signal) => {
     await db.project.update({ where: { id }, data: { status: "BUILDING" } });
-    const before = ((await latestCheckpoint(id))?.files as Files | undefined) ?? {};
-    let result;
-    let checkpoint;
+    const previous = await latestCheckpoint(id);
+    const before = (previous?.files as Files | undefined) ?? {};
     try {
       const gen = runBuild(blueprint, project.framework, mode, signal);
       let step = await gen.next();
@@ -29,17 +29,18 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         emit(step.value);
         step = await gen.next();
       }
-      result = step.value;
-      checkpoint = await createCheckpoint(id, result.files, result.summary, result.engine);
+      const { files, summary, engine } = step.value;
+      const checkpoint = await createCheckpoint(id, files, summary, engine);
+      await syncAgents(id, blueprint, project.framework);
+      await db.project.update({ where: { id }, data: { status: settled } });
+      await addMessage(id, "assistant", summary, { kind: "build", version: checkpoint.version, engine, changes: diffFiles(before, files) });
+      emit({ type: "done", summary, checkpointId: checkpoint.id, version: checkpoint.version });
     } catch (err) {
-      await db.project.update({ where: { id }, data: { status: project.status } });
+      // Reconcile from what actually persisted: a checkpoint may exist even if a later write failed.
+      const now = await latestCheckpoint(id).catch(() => null);
+      const status = now && now.version !== previous?.version ? settled : project.status === "BUILDING" ? "PLANNING" : project.status;
+      await db.project.update({ where: { id }, data: { status } }).catch(() => {});
       throw err;
     }
-    const { files, summary, engine } = result;
-    await syncAgents(id, blueprint, project.framework);
-    await db.project.update({ where: { id }, data: { status: project.status === "DEPLOYED" ? "DEPLOYED" : "READY" } });
-    const changes = diffFiles(before, files);
-    await addMessage(id, "assistant", summary, { kind: "build", version: checkpoint.version, engine, changes });
-    emit({ type: "done", summary, checkpointId: checkpoint.id, version: checkpoint.version });
   }, req.signal);
 }

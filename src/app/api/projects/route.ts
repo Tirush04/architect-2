@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { LIMITS, readJson } from "@/lib/body";
 import { db } from "@/lib/db";
 import { sessionUserId } from "@/lib/session";
 import { CreateProjectSchema } from "@/lib/schemas";
 import { getFramework } from "@/lib/frameworks";
 import { getTemplate } from "@/lib/templates";
 import { titleFromPrompt } from "@/lib/utils";
+import { usageStatus } from "@/lib/rate-limit";
+import { prismaUsageStore } from "@/lib/usage";
 
 export async function GET() {
   const userId = await sessionUserId();
@@ -18,13 +21,18 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const raw = await readJson(req, LIMITS.small);
+  if (!raw.ok) return raw.response;
   const userId = await sessionUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const body = await req.json().catch(() => null);
+  const body = raw.data;
   const parsed = CreateProjectSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request" }, { status: 400 });
   }
+  const quota = await usageStatus(prismaUsageStore, userId, "project", new Date(), 100);
+  if (quota.overLimit) return NextResponse.json({ error: "Daily project limit reached. Try again tomorrow." }, { status: 429 });
+  await prismaUsageStore.record(userId, "project");
   const template = getTemplate(parsed.data.templateId);
   const prompt = parsed.data.prompt;
   const user = await db.user.findUnique({ where: { id: userId }, select: { lens: true } });

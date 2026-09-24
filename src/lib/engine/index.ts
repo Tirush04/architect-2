@@ -64,16 +64,32 @@ export const PLAN_STEPS = [
   { id: "agents", label: "Planning the agents" },
 ];
 
+export function revisionPrompt(current: Blueprint, revision: string): string {
+  return `Here is the current Blueprint:\n${JSON.stringify(current, null, 2)}\n\nRevise it to address this request, keeping everything else unchanged: ${revision}`;
+}
+
 export async function* runPlan(
   prompt: string,
   mode: EngineMode,
   signal?: AbortSignal,
+  opts: { current?: Blueprint | null; revision?: string } = {},
 ): AsyncGenerator<BuildEvent, Blueprint> {
   yield { type: "engine", engine: mode.claude ? "claude" : "demo", reason: mode.reason };
   let blueprint: Blueprint | null = null;
+  const revising = !!(opts.current && opts.revision);
+
+  if (revising && !mode.claude) {
+    yield { type: "step", id: "revise", label: "Revising the Blueprint", state: "active" };
+    await sleep(300);
+    const { blueprint: next, changes } = applyDemoEdit(opts.current!, opts.revision!);
+    yield { type: "step", id: "revise", label: "Revising the Blueprint", state: "done" };
+    yield { type: "status", text: changes.length ? `${changes.join(". ")}.` : `I kept the Blueprint as is. ${DEMO_HELP}` };
+    yield { type: "blueprint", blueprint: next };
+    return next;
+  }
 
   if (mode.claude) {
-    const pending = planWithClaude(prompt, signal).then(
+    const pending = planWithClaude(revising ? revisionPrompt(opts.current!, opts.revision!) : prompt, signal).then(
       (bp) => ({ ok: true as const, bp }),
       (err: unknown) => ({ ok: false as const, err }),
     );
@@ -94,7 +110,8 @@ export async function* runPlan(
     }
   }
 
-  blueprint ??= pickScenario(prompt);
+  blueprint ??= revising ? applyDemoEdit(opts.current!, opts.revision!).blueprint : pickScenario(prompt);
+  if (revising) yield { type: "status", text: "Revised the Blueprint. Review it, then approve to build." };
   yield { type: "blueprint", blueprint };
   return blueprint;
 }

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LIMITS, readJson } from "@/lib/body";
 import { z } from "zod";
 import { isSafePath } from "@/lib/engine/file-stream-parser";
 import { diffFiles } from "@/lib/diff";
@@ -14,10 +15,12 @@ const SaveSchema = z.object({
 
 /** Save a manual edit (Pro lens) as a new checkpoint. */
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const raw = await readJson(req, LIMITS.medium);
+  if (!raw.ok) return raw.response;
   const { id } = await params;
   const r = await projectForRequest(id);
   if ("error" in r) return r.error;
-  const parsed = SaveSchema.safeParse(await req.json().catch(() => null));
+  const parsed = SaveSchema.safeParse(raw.data);
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid request");
   const { path, content, remove } = parsed.data;
   const latest = await latestCheckpoint(id);

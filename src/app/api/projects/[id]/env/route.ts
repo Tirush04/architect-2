@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { LIMITS, readJson } from "@/lib/body";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { encryptSecret, decryptSecret, maskSecret } from "@/lib/crypto";
@@ -27,10 +28,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
 }
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const raw = await readJson(req, LIMITS.small);
+  if (!raw.ok) return raw.response;
   const { id } = await params;
   const r = await projectForRequest(id);
   if ("error" in r) return r.error;
-  const parsed = z.object({ key: KeySchema, value: z.string().min(1).max(4000) }).safeParse(await req.json().catch(() => null));
+  const parsed = z.object({ key: KeySchema, value: z.string().min(1).max(4000) }).safeParse(raw.data);
   if (!parsed.success) return badRequest(parsed.error.issues[0]?.message ?? "Invalid variable");
   const { key, value } = parsed.data;
   if ((await db.envVar.count({ where: { projectId: id } })) >= 50) return badRequest("Limit of 50 variables");

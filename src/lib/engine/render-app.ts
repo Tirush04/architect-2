@@ -135,7 +135,8 @@ export function renderAppHtml(blueprint: Blueprint): string {
   .kpi .label { color: var(--muted); font-size: 12px; }
   .kpi .value { font-size: 24px; font-weight: 700; margin-top: 4px; letter-spacing: -0.02em; }
   .kpi .delta { font-size: 12px; color: #16a34a; }
-  .grid2 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .grid2 { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); gap: 16px; }
+  .card { min-width: 0; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; }
   th { text-align: left; color: var(--muted); font-weight: 500; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   td { padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -156,6 +157,7 @@ export function renderAppHtml(blueprint: Blueprint): string {
   .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .chip { font-size: 11px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); }
   .hidden { display: none; }
+  @media (max-width: 1100px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
   @media (max-width: 760px) { .app { grid-template-columns: 1fr; } aside { flex-direction: row; overflow-x: auto; padding: 10px; } .brand { display: none; } .grid2 { grid-template-columns: 1fr; } main { padding: 18px; } }
 </style>
 </head>
