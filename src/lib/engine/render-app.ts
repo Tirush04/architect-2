@@ -142,6 +142,7 @@ export function renderAppHtml(blueprint: Blueprint): string {
   td { padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
   tr:hover td { background: var(--soft); }
   .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: var(--soft); color: var(--accent); }
+  .dark .pill { color: color-mix(in srgb, var(--accent) 45%, white); background: color-mix(in srgb, var(--accent) 22%, transparent); }
   .pill.Resolved { background: #dcfce7; color: #166534; } .pill.Escalated { background: #fee2e2; color: #991b1b; } .pill.Open { background: #fef3c7; color: #92400e; }
   .agent { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .agent:last-child { border: 0; }
