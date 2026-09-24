@@ -15,6 +15,8 @@ const pg = new EmbeddedPostgres({
   password: "architect",
   port,
   persistent: true,
+  // Windows defaults to WIN1252; generated apps contain Unicode.
+  initdbFlags: ["--encoding=UTF8", "--locale=C"],
   onLog: () => {},
 });
 

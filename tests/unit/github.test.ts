@@ -4,8 +4,8 @@ import { detectStack, guessAgentFramework, importRepo, parseRepo, pushFiles, rep
 function fakeGitHub(overrides: Partial<{ defaultBranch: string }> = {}) {
   const branch = overrides.defaultBranch ?? "main";
   const calls: Record<string, unknown[]> = {};
-  const rec = (name: string, ret: unknown) =>
-    vi.fn(async (p: unknown) => {
+  const rec = <T,>(name: string, ret: T) =>
+    vi.fn(async (p: unknown): Promise<T> => {
       (calls[name] ??= []).push(p);
       return ret;
     });
