@@ -1,0 +1,195 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  lens          Lens      @default(GUIDED)
+  onboarded     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts    Account[]
+  sessions    Session[]
+  projects    Project[]
+  usageEvents UsageEvent[]
+  apiKeys     ApiKey[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+enum Lens {
+  GUIDED
+  PRO
+}
+
+enum ProjectStatus {
+  DRAFT
+  PLANNING
+  BUILDING
+  READY
+  DEPLOYED
+}
+
+model Project {
+  id         String        @id @default(cuid())
+  userId     String
+  name       String
+  prompt     String
+  lens       Lens          @default(GUIDED)
+  framework  String        @default("lyzr")
+  status     ProjectStatus @default(DRAFT)
+  blueprint  Json?
+  source     String        @default("prompt")
+  githubRepo String?
+  shareSlug  String?       @unique
+  starred    Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages    Message[]
+  checkpoints Checkpoint[]
+  agents      Agent[]
+  deployments Deployment[]
+  envVars     EnvVar[]
+
+  @@index([userId, updatedAt])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  projectId String
+  role      String
+  content   String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
+
+model Checkpoint {
+  id        String   @id @default(cuid())
+  projectId String
+  version   Int
+  summary   String
+  files     Json
+  engine    String   @default("claude")
+  createdAt DateTime @default(now())
+
+  project     Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  deployments Deployment[]
+
+  @@unique([projectId, version])
+}
+
+model Agent {
+  id        String   @id @default(cuid())
+  projectId String
+  name      String
+  role      String
+  framework String
+  config    Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Deployment {
+  id           String   @id @default(cuid())
+  projectId    String
+  checkpointId String
+  env          String   @default("production")
+  status       String   @default("live")
+  url          String
+  createdAt    DateTime @default(now())
+
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  checkpoint Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+}
+
+model EnvVar {
+  id        String   @id @default(cuid())
+  projectId String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, key])
+}
+
+model ApiKey {
+  id        String    @id @default(cuid())
+  userId    String
+  name      String
+  prefix    String
+  hash      String    @unique
+  lastUsed  DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind, createdAt])
+}
