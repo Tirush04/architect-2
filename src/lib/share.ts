@@ -22,7 +22,7 @@ export function sharedAppHeaders(): Record<string, string> {
       "sandbox allow-scripts allow-forms allow-popups allow-modals; frame-ancestors 'self'",
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "no-referrer",
-    "Cache-Control": "public, max-age=60",
+    "Cache-Control": "no-store",
   };
 }
 

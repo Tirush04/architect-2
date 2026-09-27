@@ -8,6 +8,7 @@ import { FRAMEWORKS } from "@/lib/frameworks";
 import { regenerateSupportFiles } from "@/lib/engine";
 import { renderAppHtml } from "@/lib/engine/render-app";
 import { addMessage, createCheckpoint, latestCheckpoint, syncAgents } from "@/lib/projects";
+import { diffFiles } from "@/lib/diff";
 import { badRequest, projectForRequest } from "@/lib/route-helpers";
 
 const PatchSchema = z.object({
@@ -42,7 +43,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const summary = framework && framework !== project.framework ? `Switched agents to ${FRAMEWORKS.find((f) => f.id === framework)?.name}` : "Updated the Blueprint";
     checkpoint = await createCheckpoint(id, next, summary, latest.engine);
     await syncAgents(id, nextBlueprint, nextFramework);
-    await addMessage(id, "assistant", summary, { kind: "build", version: checkpoint.version, engine: latest.engine });
+    await addMessage(id, "assistant", summary, { kind: "build", version: checkpoint.version, engine: latest.engine, changes: diffFiles(files, next) });
   }
 
   const updated = await db.project.update({

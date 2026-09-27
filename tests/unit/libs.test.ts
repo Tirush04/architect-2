@@ -97,6 +97,9 @@ describe("share", () => {
     expect(csp).toContain("sandbox allow-scripts");
     expect(csp).not.toContain("allow-same-origin");
   });
+  it("is never cached, so redeploys and rollbacks show up immediately", () => {
+    expect(sharedAppHeaders()["Cache-Control"]).toBe("no-store");
+  });
 });
 
 describe("utils", () => {
