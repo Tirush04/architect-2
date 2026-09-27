@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" font-family="Inter, Segoe UI, system-ui, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a4f5a"/>
+    </marker>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#2346d8" stroke-opacity="0.06"/>
+    </pattern>
+    <style>
+      .built { fill:#ffffff; stroke:#2346d8; stroke-width:2; }
+      .design { fill:#fbfaf7; stroke:#7c818c; stroke-width:1.6; stroke-dasharray:7 5; }
+      .t { font-size:17px; font-weight:650; fill:#16181d; }
+      .s { font-size:13.5px; fill:#4a4f5a; }
+      .tag { font-size:11px; font-family: ui-monospace, Consolas, monospace; letter-spacing:.06em; fill:#7c818c; }
+      .e { stroke:#4a4f5a; stroke-width:1.6; fill:none; marker-end:url(#a); }
+      .el { font-size:12px; fill:#4a4f5a; }
+    </style>
+  </defs>
+  <rect width="1600" height="980" fill="#f7f6f2"/>
+  <rect width="1600" height="980" fill="url(#grid)"/>
+
+  <text x="40" y="44" font-size="26" font-weight="700" fill="#16181d">Architect 2.0 — architecture</text>
+  <text x="40" y="68" class="s">One project, two lenses · plan-gated, event-streamed generation · agents first-class</text>
+
+  <!-- Users -->
+  <rect x="600" y="92" width="400" height="74" rx="12" class="built"/>
+  <text x="800" y="122" text-anchor="middle" class="t">Browser</text>
+  <text x="800" y="145" text-anchor="middle" class="s">Guided lens  ·  Pro lens (same project)</text>
+
+  <!-- Web app -->
+  <rect x="520" y="206" width="560" height="112" rx="12" class="built"/>
+  <text x="540" y="228" class="tag">BUILT · NEXT.JS 15 ON VERCEL</text>
+  <text x="540" y="254" class="t">Web app + API</text>
+  <text x="540" y="278" class="s">Workspace UI · Auth.js (email, GitHub, Google) · encrypted secrets</text>
+  <text x="540" y="300" class="s">SSE: step · file_start · file_delta · file · blueprint · done</text>
+
+  <!-- Postgres -->
+  <rect x="70" y="214" width="330" height="96" rx="12" class="built"/>
+  <text x="90" y="236" class="tag">BUILT · NEON</text>
+  <text x="90" y="262" class="t">Postgres (Prisma)</text>
+  <text x="90" y="286" class="s">users · projects · checkpoints · usage</text>
+
+  <!-- GitHub -->
+  <rect x="1200" y="206" width="350" height="112" rx="12" class="built"/>
+  <text x="1220" y="228" class="tag">BUILT → GITHUB APP</text>
+  <text x="1220" y="254" class="t">GitHub</text>
+  <text x="1220" y="278" class="s">push checkpoint as a commit · import repo</text>
+  <text x="1220" y="300" class="s">next: 2-way sync, PRs, webhooks</text>
+
+  <!-- Harness -->
+  <rect x="520" y="370" width="560" height="140" rx="12" class="built"/>
+  <text x="540" y="392" class="tag">BUILT (PLAN · BUILD · EDIT) + DESIGN (VERIFY, DURABLE)</text>
+  <text x="540" y="418" class="t">Builder agent harness</text>
+  <text x="540" y="442" class="s">Blueprint spec (zod) → streamed files → append-only checkpoints</text>
+  <text x="540" y="464" class="s">agent code for 6 frameworks · budgets · human approval gates</text>
+  <text x="540" y="486" class="s">next: verify loop (tests, screenshot) · durable workflows · evals</text>
+
+  <!-- Demo engine -->
+  <rect x="70" y="384" width="330" height="112" rx="12" class="built"/>
+  <text x="90" y="406" class="tag">BUILT</text>
+  <text x="90" y="432" class="t">Scripted demo engine</text>
+  <text x="90" y="456" class="s">same event protocol · no key needed</text>
+  <text x="90" y="478" class="s">fallback on error / refusal / limit</text>
+
+  <!-- Gateway -->
+  <rect x="1200" y="370" width="350" height="112" rx="12" class="design"/>
+  <text x="1220" y="392" class="tag">DESIGN</text>
+  <text x="1220" y="418" class="t">LLM gateway (proxy)</text>
+  <text x="1220" y="442" class="s">task routing · BYOK · credits · cache</text>
+  <text x="1220" y="464" class="s">fallback · cost + OpenTelemetry traces</text>
+
+  <!-- Models -->
+  <rect x="1200" y="520" width="350" height="80" rx="12" class="design"/>
+  <text x="1220" y="552" class="t">Models</text>
+  <text x="1220" y="576" class="s">Anthropic (built) · OpenAI · Gemini · open</text>
+
+  <!-- Sandbox fleet -->
+  <rect x="520" y="566" width="560" height="112" rx="12" class="design"/>
+  <text x="540" y="588" class="tag">DESIGN</text>
+  <text x="540" y="614" class="t">Sandbox fleet</text>
+  <text x="540" y="638" class="s">Firecracker microVM per project · warm pool + snapshots</text>
+  <text x="540" y="660" class="s">default-deny egress · quotas · TTL / idle suspend</text>
+
+  <!-- iframe sandbox built -->
+  <rect x="70" y="566" width="330" height="112" rx="12" class="built"/>
+  <text x="90" y="588" class="tag">BUILT</text>
+  <text x="90" y="614" class="t">Sandboxed preview</text>
+  <text x="90" y="638" class="s">iframe sandbox, no same-origin</text>
+  <text x="90" y="660" class="s">/share: CSP sandbox · no-store</text>
+
+  <!-- Preview proxy -->
+  <rect x="520" y="730" width="270" height="100" rx="12" class="design"/>
+  <text x="540" y="752" class="tag">DESIGN</text>
+  <text x="540" y="778" class="t">Preview proxy</text>
+  <text x="540" y="802" class="s">separate domain · signed token</text>
+
+  <!-- Deploy pipeline -->
+  <rect x="810" y="730" width="270" height="100" rx="12" class="built"/>
+  <text x="830" y="752" class="tag">BUILT</text>
+  <text x="830" y="778" class="t">Deploy pipeline</text>
+  <text x="830" y="802" class="s">checkpoint → live URL · rollback</text>
+
+  <!-- Object storage -->
+  <rect x="70" y="730" width="330" height="100" rx="12" class="design"/>
+  <text x="90" y="752" class="tag">DESIGN</text>
+  <text x="90" y="778" class="t">Object storage (S3 / R2)</text>
+  <text x="90" y="802" class="s">checkpoints + VM snapshots by hash</text>
+
+  <!-- Runtime proxy -->
+  <rect x="1200" y="640" width="350" height="90" rx="12" class="design"/>
+  <text x="1220" y="662" class="tag">DESIGN</text>
+  <text x="1220" y="688" class="t">Runtime egress proxy</text>
+  <text x="1220" y="712" class="s">secrets injected at egress · PII guardrails</text>
+
+  <!-- Deploy targets -->
+  <rect x="1200" y="760" width="350" height="90" rx="12" class="design"/>
+  <text x="1220" y="782" class="tag">DESIGN</text>
+  <text x="1220" y="808" class="t">Deploy targets</text>
+  <text x="1220" y="832" class="s">CDN (UI) · functions · Lyzr agent runtime</text>
+
+  <!-- Edges -->
+  <path class="e" d="M800 166 V206"/>
+  <path class="e" d="M520 262 H400"/>
+  <path class="e" d="M1080 262 H1200"/>
+  <path class="e" d="M800 318 V370"/>
+  <path class="e" d="M520 440 H400"/>
+  <text x="408" y="432" class="el">fallback</text>
+  <path class="e" d="M1080 426 H1200"/>
+  <path class="e" d="M1375 482 V520"/>
+  <path class="e" d="M800 510 V566"/>
+  <text x="808" y="545" class="el">tools: files · shell · tests</text>
+  <path class="e" d="M520 622 H400"/>
+  <text x="408" y="614" class="el">today</text>
+  <path class="e" d="M655 730 V678"/>
+  <path class="e" d="M945 510 C 1000 600, 990 690, 945 730"/>
+  <path class="e" d="M1080 780 H1200"/>
+  <path class="e" d="M1375 760 V730"/>
+  <path class="e" d="M1375 640 C 1580 610, 1580 520, 1550 482"/>
+  <path class="e" d="M520 496 H460 V780 H400"/>
+  <text x="408" y="772" class="el">snapshots</text>
+
+  <!-- Legend -->
+  <rect x="70" y="880" width="30" height="20" rx="4" class="built"/>
+  <text x="112" y="895" class="s">Built in this prototype</text>
+  <rect x="330" y="880" width="30" height="20" rx="4" class="design"/>
+  <text x="372" y="895" class="s">Production design (see docs/ARCHITECTURE.md)</text>
+  <text x="70" y="940" class="s">Generated code is untrusted: it only ever runs in an opaque origin (today) or a microVM behind a separate preview domain (production).</text>
+</svg>
