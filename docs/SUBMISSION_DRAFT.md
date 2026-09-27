@@ -2,8 +2,8 @@
 
 Form: https://hiring.lyzrarchitect.space/ → Submit tab.
 
-- **Deployed URL:** _<fill after Vercel deploy>_
-- **GitHub repository:** _<fill after push; must be public>_
+- **Deployed URL:** https://architect-2-tirush.vercel.app
+- **GitHub repository:** https://github.com/Tirush04/architect-2
 
 ## Why would a non-technical user pick your platform?
 *(Someone who already uses Replit, Lovable or Emergent.)*
